@@ -95,6 +95,7 @@ async def ask(payload: Question):
                 "options": {"streaming": True, "stop": None},
             },
         )
+        rt.post()
         genai_client: genai.Client = app.state.genai_client
 
         full_content = ""
@@ -126,16 +127,17 @@ async def ask(payload: Question):
                         input_tokens=input_tokens,
                         output_tokens=output_tokens,
                         total_tokens=input_tokens + output_tokens,
-                    )
+                    ),
                 },
             )
 
-            rt.post()
+            rt.patch()
 
         except Exception as e:
+            print(e)
             rt.end(error=str(e))
-            rt.post()
-            raise e
+            rt.patch()
+            yield "data: [ERROR]\n\n"
 
     return StreamingResponse(
         generate(),
