@@ -101,7 +101,7 @@ async def ask(payload: Question):
         full_content = ""
         input_tokens = 0
         output_tokens = 0
-
+        first_token = None
         try:
             async for (
                 chunk
@@ -109,6 +109,10 @@ async def ask(payload: Question):
                 model=settings.VERTEX_AI_MODEL,
                 contents=payload.question,
             ):
+                if first_token is None:
+                    first_token = chunk
+                    rt.add_event({"name": "new_token"})
+
                 if chunk.usage_metadata:
                     input_tokens = chunk.usage_metadata.prompt_token_count
                     output_tokens = chunk.usage_metadata.candidates_token_count
